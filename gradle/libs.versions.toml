@@ -1,0 +1,39 @@
+[versions]
+agp = "8.7.3"
+autoservice = "1.1.1"
+autoservice-ksp = "1.2.0"
+kotlin = "2.1.0"
+kotlin-inject = "0.7.2"
+kotlin-inject-anvil = "0.1.2"
+kotlin-poet = "2.0.0"
+ksp = "2.1.0-1.0.29"
+lifecycle = "2.8.7"
+coreKtx = "1.15.0"
+junit = "4.13.2"
+junitVersion = "1.2.1"
+espressoCore = "3.6.1"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+auto-service-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoservice" }
+auto-service-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version.ref = "autoservice-ksp" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlin-inject-compiler = { group = "me.tatarka.inject", name = "kotlin-inject-compiler-ksp", version.ref = "kotlin-inject" }
+kotlin-inject-runtime = { group = "me.tatarka.inject", name = "kotlin-inject-runtime", version.ref = "kotlin-inject" }
+kotlin-inject-anvil-compiler = { group = "software.amazon.lastmile.kotlin.inject.anvil", name = "compiler", version.ref = "kotlin-inject-anvil" }
+kotlin-inject-anvil-runtime = { group = "software.amazon.lastmile.kotlin.inject.anvil", name = "runtime", version.ref = "kotlin-inject-anvil" }
+kotlin-inject-anvil-runtime-optional = { group = "software.amazon.lastmile.kotlin.inject.anvil", name = "runtime-optional", version.ref = "kotlin-inject-anvil" }
+kotlin-poet = { module = "com.squareup:kotlinpoet", version.ref = "kotlin-poet" }
+kotlin-poet-ksp = { module = "com.squareup:kotlinpoet-ksp", version.ref = "kotlin-poet" }
+ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
+lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycle" }
+lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+jvm = { id = "org.jetbrains.kotlin.jvm" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
