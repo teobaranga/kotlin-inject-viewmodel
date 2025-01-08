@@ -1,4 +1,5 @@
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google {
             content {
@@ -22,4 +23,4 @@ dependencyResolutionManagement {
 rootProject.name = "Kotlin Inject ViewModel"
 include(":app")
 include(":compiler")
-include(":runtime")
+include(":runtime", ":runtime-compose")

@@ -1,12 +1,25 @@
 plugins {
-    alias(libs.plugins.jvm)
-    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.maven.publish)
 }
 
-group = "com.teobaranga.kotlininject.viewmodel.runtime"
+kotlin {
+    androidTarget()
+
+    jvm()
+
+    applyDefaultHierarchyTemplate()
+}
+
+android {
+    namespace = "com.teobaranga.kotlin.inject.viewmodel.runtime"
+    compileSdk = 35
+}
 
 dependencies {
-    implementation(libs.kotlin.inject.runtime)
-    implementation(libs.kotlin.inject.anvil.runtime)
-    implementation(libs.lifecycle.viewmodel.compose)
+    commonMainImplementation(libs.kotlin.inject.runtime)
+    commonMainImplementation(libs.kotlin.inject.anvil.runtime)
+    commonMainImplementation(libs.lifecycle.viewmodel)
+    commonMainImplementation(libs.lifecycle.viewmodel.savedstate)
 }

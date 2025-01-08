@@ -2,14 +2,15 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kotlin.inject.viewmodel.android.compose)
 }
 
 android {
-    namespace = "com.teobaranga.kotlininject.viewmodel"
+    namespace = "com.teobaranga.kotlin.inject.viewmodel"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.teobaranga.kotlininject.viewmodel"
+        applicationId = "com.teobaranga.kotlin.inject.viewmodel"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -38,10 +39,14 @@ android {
 
 dependencies {
     implementation(project(":runtime"))
+    implementation(project(":runtime-compose"))
     ksp(project(":compiler"))
 
+    implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
     implementation(libs.lifecycle.viewmodel)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.viewmodel.savedstate)
 
     implementation(libs.kotlin.inject.runtime)
     implementation(libs.kotlin.inject.anvil.runtime)
