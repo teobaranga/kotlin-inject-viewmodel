@@ -61,6 +61,7 @@ lifecycle-viewmodel-savedstate = { group = "androidx.lifecycle", name = "lifecyc
 [plugins]
 # Plugins defined by this project
 kotlin-inject-viewmodel-android-compose = { id = "com.teobaranga.kotlin.inject.viewmodel.android.compose", version = "unspecified" }
+kotlin-inject-viewmodel-publish = { id = "com.teobaranga.kotlin.inject.viewmodel.publish", version = "unspecified" }
 
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }

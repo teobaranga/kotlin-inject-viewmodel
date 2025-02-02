@@ -2,7 +2,7 @@ plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.kotlin.inject.viewmodel.publish)
 }
 
 kotlin {

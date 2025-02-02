@@ -46,8 +46,6 @@ dependencies {
     // https://stackoverflow.com/a/70878181/8643328
     compileOnly(files(libs.javaClass.superclass.protectionDomain.codeSource.location))
     compileOnly(libs.android.gradlePlugin)
-//    compileOnly(libs.android.tools.common)
-//    compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.compose.gradlePlugin)
 }
 
@@ -63,6 +61,10 @@ gradlePlugin {
         register("androidCompose") {
             id = "com.teobaranga.kotlin.inject.viewmodel.android.compose"
             implementationClass = "AndroidComposeConventionPlugin"
+        }
+        register("mavenPublish") {
+            id = "com.teobaranga.kotlin.inject.viewmodel.publish"
+            implementationClass = "PublishingPlugin"
         }
     }
 }

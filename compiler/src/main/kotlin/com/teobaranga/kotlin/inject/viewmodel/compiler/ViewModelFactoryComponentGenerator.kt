@@ -1,5 +1,7 @@
 package com.teobaranga.kotlin.inject.viewmodel.compiler
 
+import com.google.devtools.ksp.getClassDeclarationByName
+import com.google.devtools.ksp.processing.Resolver
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
@@ -21,15 +23,24 @@ internal class ViewModelFactoryComponentGenerator(
     override val env: SymbolProcessorEnvironment,
 ) : EnvironmentOwner {
 
-    fun generate(scope: TypeName) {
-        FileSpec.builder(getPackageName(scope), getViewModelFactoryName(scope))
-            .addType(generateComponentInterface(scope))
-            .build()
-            .writeTo(codeGenerator = env.codeGenerator, aggregating = false)
+    fun generate(resolver: Resolver, scope: TypeName) {
+        val pkgName = getPackageName(scope)
+        val simpleName = getViewModelFactoryComponentName(scope)
+        val fqName = "$pkgName.$simpleName"
+        val classDeclaration = resolver.getClassDeclarationByName(fqName)
+        if (classDeclaration == null) {
+            env.logger.info("$fqName not found, generating")
+            FileSpec.builder(pkgName, simpleName)
+                .addType(generateComponentInterface(scope))
+                .build()
+                .writeTo(codeGenerator = env.codeGenerator, aggregating = false)
+        } else {
+            env.logger.info("$fqName exists, skipping generation")
+        }
     }
 
     private fun generateComponentInterface(scope: TypeName): TypeSpec {
-        return TypeSpec.interfaceBuilder(getViewModelFactoryName(scope))
+        return TypeSpec.interfaceBuilder(getViewModelFactoryComponentName(scope))
             .addAnnotation(
                 AnnotationSpec.builder(ContributesTo::class)
                     .addMember("%T::class", scope)
@@ -72,7 +83,7 @@ internal class ViewModelFactoryComponentGenerator(
 
     companion object {
 
-        fun getViewModelFactoryName(scope: TypeName): String {
+        fun getViewModelFactoryComponentName(scope: TypeName): String {
             val simpleName = ClassName.bestGuess(scope.toString()).simpleName
             return "${simpleName}ViewModelFactoryComponent"
         }

@@ -3,7 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.jvm)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.kotlin.inject.viewmodel.publish)
 }
 
 group = "com.teobaranga.kotlin.inject.viewmodel.compiler"

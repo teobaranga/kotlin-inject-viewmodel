@@ -74,14 +74,14 @@ internal class ContributesViewModelSymbolProcessor(
 
                 val result = viewModelComponentGenerator.generate(annotatedClass)
                 if (scopes.add(result.scope)) {
-                    viewModelFactoryComponentGenerator.generate(result.scope)
+                    viewModelFactoryComponentGenerator.generate(resolver, result.scope)
                 }
 
                 // Associate this with the right ViewModelFactoryComponent
                 env.codeGenerator.associate(
                     sources = listOf(annotatedClass.containingFile!!),
                     packageName = ViewModelFactoryComponentGenerator.getPackageName(result.scope),
-                    fileName = ViewModelFactoryComponentGenerator.getViewModelFactoryName(result.scope),
+                    fileName = ViewModelFactoryComponentGenerator.getViewModelFactoryComponentName(result.scope),
                 )
             }
 
