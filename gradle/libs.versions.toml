@@ -15,7 +15,7 @@ lifecycle = "2.9.0-alpha09"
 maven-publish = "0.30.0"
 material3 = "1.4.0-alpha07"
 coreKtx = "1.15.0"
-junit-jupiter = "5.11.2"
+junit-jupiter = "5.11.4"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 
