@@ -1,5 +1,8 @@
 # Kotlin Inject ViewModel
 
+![Maven Central Version](https://img.shields.io/maven-central/v/com.teobaranga.kotlin.inject.viewmodel/runtime)
+![Push](https://github.com/teobaranga/kotlin-inject-viewmodel/actions/workflows/push.yaml/badge.svg?branch=main)
+
 `kotlin-inject-viewmodel` is a custom annotation processor that builds on top of
 [kotlin-inject-anvil](https://github.com/amzn/kotlin-inject-anvil) to provide a way to inject ViewModels similar to
 Hilt and @HiltViewModel.
