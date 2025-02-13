@@ -71,6 +71,65 @@ class ContributesViewModelSymbolProcessorTest {
     }
 
     @Test
+    fun `ViewModel with base class extending ViewModel generates correct component`() {
+        compile(
+            SourceFile.kotlin("TestViewModel.kt", """
+                package com.teobaranga.kotlin.inject.viewmodel.compiler.test
+
+                import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
+                import me.tatarka.inject.annotations.Inject
+                import software.amazon.lastmile.kotlin.inject.anvil.AppScope
+
+                @Suppress("unused")
+                @Inject
+                @ContributesViewModel(AppScope::class)
+                class TestViewModel(): BaseViewModel()
+            """),
+            SourceFile.kotlin("BaseViewModel.kt", """
+                package com.teobaranga.kotlin.inject.viewmodel.compiler.test
+
+                import androidx.lifecycle.ViewModel
+
+                @Suppress("unused")
+                abstract class BaseViewModel(): ViewModel()
+            """)
+        ) {
+            exitCode shouldBe KotlinCompilation.ExitCode.OK
+
+            testViewModelComponentClass.annotations.single() shouldBe ContributesTo(AppScope::class)
+
+            with(testViewModelComponentClass.declaredFunctions.single()) {
+                name shouldBe "provideTestViewModel"
+
+                annotations shouldBe listOf(Provides(), IntoMap())
+
+                // Provider function should take in the basic ViewModel factory function: () -> TestViewModel
+                with(valueParameters.single()) {
+                    type shouldBe Function0::class.createType(
+                        listOf(KTypeProjection(KVariance.INVARIANT, testViewModelClass.createType()))
+                    )
+                }
+
+                // Pair<KClass<out ViewModel>, () -> ViewModel>
+                returnType shouldBe Pair::class.createType(
+                    listOf(
+                        KTypeProjection(
+                            KVariance.INVARIANT, KClass::class.createType(
+                                listOf(KTypeProjection(KVariance.OUT, viewModelClass.createType()))
+                            )
+                        ),
+                        KTypeProjection(
+                            KVariance.INVARIANT, Function0::class.createType(
+                                listOf(KTypeProjection(KVariance.INVARIANT, viewModelClass.createType()))
+                            )
+                        )
+                    ),
+                )
+            }
+        }
+    }
+
+    @Test
     fun `ViewModel without dependencies generates correct component`() {
         compile(
             """

@@ -2,6 +2,7 @@ package com.teobaranga.kotlin.inject.viewmodel.compiler
 
 import com.google.auto.service.AutoService
 import com.google.devtools.ksp.KspExperimental
+import com.google.devtools.ksp.getAllSuperTypes
 import com.google.devtools.ksp.isAnnotationPresent
 import com.google.devtools.ksp.isPublic
 import com.google.devtools.ksp.processing.Resolver
@@ -103,7 +104,7 @@ internal class ContributesViewModelSymbolProcessor(
     }
 
     private fun KSClassDeclaration.extendsViewModel(): Boolean {
-        return superTypes.any { it.toTypeName() == ViewModelClassName }
+        return getAllSuperTypes().any { it.toTypeName() == ViewModelClassName }
     }
 
     @OptIn(KspExperimental::class)
