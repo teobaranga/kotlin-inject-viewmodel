@@ -29,7 +29,7 @@ dependencies {
 ```
 
 > [!NOTE]  
-> This library depends on `androidx.lifecycle` 2.9.0-alpha09 because this is where support for KMP ViewModel
+> This library depends on `androidx.lifecycle` 2.9.0-alpha13 because this is where support for KMP ViewModel
 > was introduced. Make sure you're okay introducing an alpha version into your project before using this library.
 
 ## Features
