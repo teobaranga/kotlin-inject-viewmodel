@@ -11,13 +11,13 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
-import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.teobaranga.kotlin.inject.viewmodel.compiler.env.EnvironmentOwner
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.SavedStateHandleClassName
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.ViewModelClassName
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.getAssistedParametersTypes
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.getNewSymbolsWithAnnotation
 import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
 import me.tatarka.inject.annotations.Inject
 
@@ -59,10 +59,8 @@ internal class ContributesViewModelSymbolProcessor(
 
     @OptIn(KspExperimental::class)
     override fun process(resolver: Resolver): List<KSAnnotated> {
-        val scopes = mutableSetOf<TypeName>()
-
         resolver
-            .getSymbolsWithAnnotation(ContributesViewModel::class.qualifiedName!!)
+            .getNewSymbolsWithAnnotation(ContributesViewModel::class)
             .filterIsInstance<KSClassDeclaration>()
             .forEach { annotatedClass ->
                 validate(annotatedClass)
@@ -73,18 +71,10 @@ internal class ContributesViewModelSymbolProcessor(
                     assistedViewModelFactoryGenerator.generate(annotatedClass)
                 }
 
-                val result = viewModelComponentGenerator.generate(annotatedClass)
-                if (scopes.add(result.scope)) {
-                    viewModelFactoryComponentGenerator.generate(resolver, result.scope)
-                }
-
-                // Associate this with the right ViewModelFactoryComponent
-                env.codeGenerator.associate(
-                    sources = listOf(annotatedClass.containingFile!!),
-                    packageName = ViewModelFactoryComponentGenerator.getPackageName(result.scope),
-                    fileName = ViewModelFactoryComponentGenerator.getViewModelFactoryComponentName(result.scope),
-                )
+                viewModelComponentGenerator.generate(annotatedClass)
             }
+
+        viewModelFactoryComponentGenerator.generate(resolver)
 
         return emptyList()
     }
