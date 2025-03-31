@@ -1,16 +1,23 @@
 package com.teobaranga.kotlin.inject.viewmodel.compiler
 
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.VIEW_MODEL_FACTORY_FQ_NAME
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.appScopeViewModelFactoryComponentClass
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.compile
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.dependencyClass
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.savedStateHandleClass
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.testViewModelClass
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.testViewModelComponentClass
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.testViewModelFactoryClass
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.userScopeViewModelFactoryComponentClass
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.viewModelClass
 import com.teobaranga.kotlin.inject.viewmodel.runtime.KotlinInjectViewModelFactory
-import com.tschuchort.compiletesting.JvmCompilationResult
 import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
-import com.tschuchort.compiletesting.configureKsp
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import me.tatarka.inject.annotations.Inject
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.Provides
-import org.intellij.lang.annotations.Language
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
 import org.junit.jupiter.api.Test
 import software.amazon.lastmile.kotlin.inject.anvil.AppScope
@@ -419,22 +426,20 @@ class ContributesViewModelSymbolProcessorTest {
     }
 
     @Test
-    fun `Scoped ViewModel factory component generated correctly`() {
+    fun `Scoped ViewModel factory component generated correctly (top-level component)`() {
         compile(
             SourceFile.kotlin(
-                "TestViewModel.kt", """
+                "AppComponent.kt", """
                 package com.teobaranga.kotlin.inject.viewmodel.compiler.test
 
-                import androidx.lifecycle.ViewModel
-                import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
-                import me.tatarka.inject.annotations.Assisted
-                import me.tatarka.inject.annotations.Inject
                 import software.amazon.lastmile.kotlin.inject.anvil.AppScope
+                import software.amazon.lastmile.kotlin.inject.anvil.MergeComponent
+                import software.amazon.lastmile.kotlin.inject.anvil.SingleIn
 
                 @Suppress("unused")
-                @Inject
-                @ContributesViewModel(AppScope::class)
-                class TestViewModel(): ViewModel()
+                @MergeComponent(AppScope::class)
+                @SingleIn(AppScope::class)
+                abstract class AppComponent
             """
             ),
         ) {
@@ -453,27 +458,36 @@ class ContributesViewModelSymbolProcessorTest {
         }
     }
 
-    private fun compile(@Language("kotlin") contents: String, block: JvmCompilationResult.() -> Unit) {
-        compile(SourceFile.kotlin("Source.kt", contents)) {
-            block(this)
-        }
-    }
+    @Test
+    fun `Scoped ViewModel factory component generated correctly (subcomponent)`() {
+        compile(
+            SourceFile.kotlin(
+                "UserComponent.kt", """
+                package com.teobaranga.kotlin.inject.viewmodel.compiler.test
 
-    private fun compile(vararg sources: SourceFile, block: JvmCompilationResult.() -> Unit) {
-        KotlinCompilation().run {
-            inheritClassPath = true
-            allWarningsAsErrors = true
-            verbose = false
-            messageOutputStream = System.out
-            this.sources = sources.toList()
-            configureKsp(useKsp2 = true) {
-                languageVersion = "2.0"
-                symbolProcessorProviders += ContributesViewModelSymbolProcessor.Provider()
-                allWarningsAsErrors = true
+                import com.teobaranga.kotlin.inject.viewmodel.compiler.UserScope
+                import software.amazon.lastmile.kotlin.inject.anvil.ContributesSubcomponent
+                import software.amazon.lastmile.kotlin.inject.anvil.SingleIn
+
+                @Suppress("unused")
+                @ContributesSubcomponent(UserScope::class)
+                @SingleIn(UserScope::class)
+                interface UserComponent
+            """
+            ),
+        ) {
+            exitCode shouldBe KotlinCompilation.ExitCode.OK
+
+            with(userScopeViewModelFactoryComponentClass) {
+
+                annotations shouldBe listOf(ContributesTo(UserScope::class), SingleIn(UserScope::class))
+
+                with(declaredFunctions.single()) {
+                    annotations shouldBe listOf(Provides(), SingleIn(UserScope::class), ForScope(UserScope::class))
+                    valueParameters.single().type shouldBe KotlinInjectViewModelFactory::class.createType()
+                    returnType.toString() shouldBe VIEW_MODEL_FACTORY_FQ_NAME
+                }
             }
-            compile()
-        }.run {
-            block(this)
         }
     }
 }

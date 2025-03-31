@@ -30,10 +30,6 @@ import me.tatarka.inject.annotations.Provides
 import software.amazon.lastmile.kotlin.inject.anvil.ContributesTo
 import kotlin.reflect.KClass
 
-data class GenerateResult(
-    val scope: TypeName,
-)
-
 internal class ViewModelComponentGenerator(
     override val env: SymbolProcessorEnvironment,
 ) : EnvironmentOwner {
@@ -42,7 +38,7 @@ internal class ViewModelComponentGenerator(
      * Generate the file containing the kotlin-inject component that contributes the ViewModel factory
      * into the right map.
      */
-    fun generate(annotatedClass: KSClassDeclaration): GenerateResult {
+    fun generate(annotatedClass: KSClassDeclaration) {
         val packageName = annotatedClass.qualifiedName?.getQualifier().orEmpty()
         val fileName = "${annotatedClass.simpleShortName}Component"
         val scope = getScope(annotatedClass)
@@ -50,8 +46,6 @@ internal class ViewModelComponentGenerator(
             .addType(generateComponentInterface(annotatedClass, scope))
             .build()
             .writeTo(codeGenerator = env.codeGenerator, aggregating = false)
-
-        return GenerateResult(scope)
     }
 
     /**
