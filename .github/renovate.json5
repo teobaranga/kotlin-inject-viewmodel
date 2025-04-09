@@ -4,8 +4,8 @@
     'config:recommended',
   ],
   "ignoreDeps": [
-    "com.teobaranga.kotlin.inject.viewmodel.android.compose:com.teobaranga.kotlin.inject.viewmodel.android.compose.gradle.plugin",
-    "com.teobaranga.kotlin.inject.viewmodel.publish:com.teobaranga.kotlin.inject.viewmodel.publish.gradle.plugin"
+    "com.teobaranga.kotlin.inject.viewmodel.android.compose",
+    "com.teobaranga.kotlin.inject.viewmodel.publish"
   ],
   packageRules: [
     {
