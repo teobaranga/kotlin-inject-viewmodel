@@ -3,6 +3,10 @@
   extends: [
     'config:recommended',
   ],
+  "ignoreDeps": [
+    "com.teobaranga.kotlin.inject.viewmodel.android.compose:com.teobaranga.kotlin.inject.viewmodel.android.compose.gradle.plugin",
+    "com.teobaranga.kotlin.inject.viewmodel.publish:com.teobaranga.kotlin.inject.viewmodel.publish.gradle.plugin"
+  ],
   packageRules: [
     {
       groupName: 'Kotlin, KSP and Compose Compiler',
