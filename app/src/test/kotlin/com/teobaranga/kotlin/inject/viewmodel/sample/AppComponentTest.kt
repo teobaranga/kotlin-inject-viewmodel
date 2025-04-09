@@ -65,7 +65,7 @@ class AppComponentTest {
             error("Factory for ViewModel with @Assisted SavedStateHandle & dependency does not have the correct type")
         }
         factory.savedStateHandle = SavedStateHandle()
-        val viewModel = factory(Dep)
+        val viewModel = factory(Dep())
         assertNotNull(viewModel)
     }
 
@@ -79,7 +79,7 @@ class AppComponentTest {
             error("Factory for ViewModel with @Assisted dependency & SavedStateHandle does not have the correct type")
         }
         factory.savedStateHandle = SavedStateHandle()
-        val viewModel = factory(Dep)
+        val viewModel = factory(Dep())
         assertNotNull(viewModel)
     }
 }
