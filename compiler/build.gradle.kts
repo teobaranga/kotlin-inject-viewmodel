@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.jvm)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.inject.viewmodel.publish)
+    alias(libs.plugins.dependency.analysis)
 }
 
 group = "com.teobaranga.kotlin.inject.viewmodel.compiler"
