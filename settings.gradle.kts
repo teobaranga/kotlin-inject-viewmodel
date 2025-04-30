@@ -20,6 +20,29 @@ dependencyResolutionManagement {
     }
 }
 
+plugins {
+    id("org.jetbrains.kotlinx.kover.aggregation") version "0.9.1"
+}
+
+kover {
+    enableCoverage()
+
+    reports {
+        excludedClasses.addAll(
+            "amazon.lastmile.inject.*",
+            "*ComponentMerged*",
+            "*_Impl*",
+            "*ViewModelComponent*",
+            "*ViewModelFactory*",
+            "*ComposableSingletons*",
+        )
+        excludedProjects.add(":app")
+        excludesAnnotatedBy.addAll(
+            "androidx.compose.ui.tooling.preview.Preview",
+        )
+    }
+}
+
 rootProject.name = "Kotlin Inject ViewModel"
 include(":app")
 include(":compiler")
