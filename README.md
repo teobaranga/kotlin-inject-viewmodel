@@ -2,6 +2,7 @@
 
 ![Maven Central Version](https://img.shields.io/maven-central/v/com.teobaranga.kotlin.inject.viewmodel/runtime)
 ![Push](https://github.com/teobaranga/kotlin-inject-viewmodel/actions/workflows/push.yaml/badge.svg?branch=main)
+![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/teobaranga/0d51d51b793558923481088312d8c4cd/raw/kotlin-inject-viewmodel-coverage-badge.json)
 
 `kotlin-inject-viewmodel` is a custom annotation processor that builds on top of
 [kotlin-inject-anvil](https://github.com/amzn/kotlin-inject-anvil) to provide a way to inject ViewModels similar to
