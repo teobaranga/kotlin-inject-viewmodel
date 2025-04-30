@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.inject.viewmodel.android.compose)
+    alias(libs.plugins.dependency.analysis)
 }
 
 android {
@@ -36,7 +37,6 @@ android {
         jvmTarget = "11"
     }
 
-    @Suppress("UnstableApiUsage")
     testOptions {
         unitTests.all { test ->
             test.useJUnitPlatform()
@@ -50,7 +50,6 @@ dependencies {
     ksp(project(":compiler"))
 
     implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.core.ktx)
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.lifecycle.viewmodel.savedstate)
@@ -64,7 +63,4 @@ dependencies {
     testImplementation(platform(libs.junit.jupiter.bom))
     testImplementation(libs.junit.jupiter.core)
     testRuntimeOnly(libs.junit.jupiter.launcher)
-
-    androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
 }

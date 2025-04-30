@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.inject.viewmodel.publish)
+    alias(libs.plugins.dependency.analysis)
 }
 
 kotlin {
@@ -13,6 +14,9 @@ kotlin {
 android {
     namespace = "com.teobaranga.kotlin.inject.viewmodel.runtime.compose"
     compileSdk = 35
+    defaultConfig {
+        minSdk = 21
+    }
 }
 
 dependencies {
