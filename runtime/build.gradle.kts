@@ -1,29 +1,26 @@
 plugins {
-    alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.inject.viewmodel.publish)
     alias(libs.plugins.dependency.analysis)
 }
 
 kotlin {
-    androidTarget()
+    applyDefaultHierarchyTemplate()
 
     jvm()
 
-    applyDefaultHierarchyTemplate()
-}
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
-android {
-    namespace = "com.teobaranga.kotlin.inject.viewmodel.runtime"
-    compileSdk = 35
-    defaultConfig {
-        minSdk = 21
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(libs.kotlin.inject.runtime)
+                implementation(libs.kotlin.inject.anvil.runtime)
+                implementation(libs.lifecycle.viewmodel)
+                implementation(libs.lifecycle.viewmodel.savedstate)
+            }
+        }
     }
-}
-
-dependencies {
-    commonMainImplementation(libs.kotlin.inject.runtime)
-    commonMainImplementation(libs.kotlin.inject.anvil.runtime)
-    commonMainImplementation(libs.lifecycle.viewmodel)
-    commonMainImplementation(libs.lifecycle.viewmodel.savedstate)
 }
