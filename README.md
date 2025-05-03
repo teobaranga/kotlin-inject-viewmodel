@@ -9,8 +9,8 @@
 Hilt and @HiltViewModel.
 
 > [!IMPORTANT]  
-> While the project has a KMP structure, only the Android target has been implemented and tested.  
-> Desktop and iOS targets are planned and will be implemented next.
+> Only the Android and iOS targets have been implemented and tested.  
+> Desktop targets are planned and will be implemented next.
 
 ## Setup
 
@@ -30,8 +30,8 @@ dependencies {
 ```
 
 > [!NOTE]  
-> This library depends on `androidx.lifecycle` 2.9.0-alpha13 because this is where support for KMP ViewModel
-> was introduced. Make sure you're okay introducing an alpha version into your project before using this library.
+> This library depends on `androidx.lifecycle` 2.9.0-rc01 because this is where support for KMP ViewModel
+> was introduced. Make sure you're okay introducing a pre-release version into your project before using this library.
 
 ## Features
 
