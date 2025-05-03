@@ -1,5 +1,4 @@
 plugins {
-    alias(libs.plugins.android.library)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.kotlin.inject.viewmodel.publish)
@@ -7,20 +6,19 @@ plugins {
 }
 
 kotlin {
-    androidTarget()
     jvm()
-}
 
-android {
-    namespace = "com.teobaranga.kotlin.inject.viewmodel.runtime.compose"
-    compileSdk = 35
-    defaultConfig {
-        minSdk = 21
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
+
+    sourceSets {
+        commonMain {
+            dependencies {
+                implementation(project(":runtime"))
+                implementation(libs.kotlin.inject.runtime)
+                implementation(libs.lifecycle.viewmodel.compose)
+            }
+        }
     }
-}
-
-dependencies {
-    commonMainImplementation(project(":runtime"))
-    commonMainImplementation(libs.kotlin.inject.runtime)
-    commonMainImplementation(libs.lifecycle.viewmodel.compose)
 }
