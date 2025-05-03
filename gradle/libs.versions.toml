@@ -35,7 +35,7 @@ junit-jupiter-bom = { module = "org.junit:junit-bom", version.ref = "junit-jupit
 junit-jupiter-core = { module = "org.junit.jupiter:junit-jupiter" }
 junit-jupiter-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 # https://github.com/JetBrains/compose-multiplatform-core/pull/1868
-jetbrains-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version = "1.8.0-alpha03" }
+jetbrains-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version = "1.8.0-rc01" }
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotlin-compile-testing-core = { module = "dev.zacsweers.kctfork:core", version.ref = "kotlin-compile-testing" }
