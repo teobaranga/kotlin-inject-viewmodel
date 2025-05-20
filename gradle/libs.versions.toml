@@ -21,7 +21,7 @@ kotlin-inject-anvil = "0.1.5"
 kotlin-poet = "2.2.0"
 lifecycle = "2.9.0"
 lifecycle-viewmodel-compose = "2.8.4"
-navigation = "2.9.0-beta01"
+navigation = "2.9.0-beta02"
 junit-jupiter = "5.12.2"
 
 [libraries]
