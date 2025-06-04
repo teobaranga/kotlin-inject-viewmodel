@@ -25,7 +25,7 @@ val JvmCompilationResult.testViewModelClass
 
 val JvmCompilationResult.testViewModelFactoryClass
     get() = classLoader
-        .loadClass("$TEST_PACKAGE.TestViewModelFactory")
+        .loadClass("$TEST_PACKAGE.TestViewModel\$Factory")
         .kotlin
 
 val JvmCompilationResult.testViewModelComponentClass

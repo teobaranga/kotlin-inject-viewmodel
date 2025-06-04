@@ -1,6 +1,3 @@
 package com.teobaranga.kotlin.inject.viewmodel.compiler.util
 
-import com.squareup.kotlinpoet.ClassName
-
-val SavedStateHandleClassName = ClassName.bestGuess("androidx.lifecycle.SavedStateHandle")
-val ViewModelClassName = ClassName.bestGuess("androidx.lifecycle.ViewModel")
+const val androidx_lifecycle_ViewModel = "androidx.lifecycle.ViewModel"

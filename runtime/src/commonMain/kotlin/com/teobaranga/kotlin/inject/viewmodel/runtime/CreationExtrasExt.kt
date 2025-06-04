@@ -12,7 +12,7 @@ import me.tatarka.inject.annotations.Assisted
  *
  * @param callback A creation callback that takes an assisted factory and returns a [ViewModel].
  */
-fun <VMF> CreationExtras.withCreationCallback(callback: (VMF) -> ViewModel): CreationExtras =
+fun <VMF> CreationExtras.withCreationCallback(callback: CreationExtras.(VMF) -> ViewModel): CreationExtras =
     MutableCreationExtras(this).addCreationCallback(callback)
 
 /**
@@ -23,7 +23,7 @@ fun <VMF> CreationExtras.withCreationCallback(callback: (VMF) -> ViewModel): Cre
  * @param callback A creation callback that takes an assisted factory and returns a [ViewModel].
  */
 @Suppress("UNCHECKED_CAST")
-fun <VMF> MutableCreationExtras.addCreationCallback(callback: (VMF) -> ViewModel): CreationExtras =
+fun <VMF> MutableCreationExtras.addCreationCallback(callback: CreationExtras.(VMF) -> ViewModel): CreationExtras =
     this.apply {
         this[CREATION_CALLBACK_KEY] = { factory -> callback(factory as VMF) }
     }

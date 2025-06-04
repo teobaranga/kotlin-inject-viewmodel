@@ -78,6 +78,85 @@ class ContributesViewModelSymbolProcessorTest {
     }
 
     @Test
+    fun `assisted factory must be provided if there are assisted dependencies`() {
+        compile(
+            """
+                package com.teobaranga.kotlin.inject.viewmodel.compiler.test
+
+                import androidx.lifecycle.ViewModel
+                import me.tatarka.inject.annotations.Assisted
+                import me.tatarka.inject.annotations.Inject
+                import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
+                import software.amazon.lastmile.kotlin.inject.anvil.AppScope
+
+                @Suppress("unused")
+                @Inject
+                @ContributesViewModel(AppScope::class)
+                class TestViewModel(@Assisted dependency: String): ViewModel()
+            """
+        ) {
+            exitCode shouldBe KotlinCompilation.ExitCode.COMPILATION_ERROR
+            messages shouldContain "ViewModels with @Assisted parameters must have an @AssistedFactory declared"
+        }
+    }
+
+    @Test
+    fun `valid assisted factory must be provided if there are assisted dependencies (annotated with @AssistedFactory)`() {
+        compile(
+            """
+                package com.teobaranga.kotlin.inject.viewmodel.compiler.test
+
+                import androidx.lifecycle.ViewModel
+                import me.tatarka.inject.annotations.Assisted
+                import me.tatarka.inject.annotations.Inject
+                import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
+                import software.amazon.lastmile.kotlin.inject.anvil.AppScope
+
+                @Suppress("unused")
+                @Inject
+                @ContributesViewModel(scope = AppScope::class, assistedFactory = TestViewModel.Factory::class)
+                class TestViewModel(@Assisted dependency: String): ViewModel() {
+                    interface Factory {
+                        operator fun invoke(dependency: String): TestViewModel
+                    }
+                }
+            """
+        ) {
+            exitCode shouldBe KotlinCompilation.ExitCode.COMPILATION_ERROR
+            messages shouldContain "ViewModel assisted factory must be an @AssistedFactory"
+        }
+    }
+
+    @Test
+    fun `valid assisted factory must be provided if there are assisted dependencies (factory of correct ViewModel)`() {
+        compile(
+            """
+                package com.teobaranga.kotlin.inject.viewmodel.compiler.test
+
+                import androidx.lifecycle.ViewModel
+                import me.tatarka.inject.annotations.Assisted
+                import me.tatarka.inject.annotations.AssistedFactory
+                import me.tatarka.inject.annotations.Inject
+                import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
+                import software.amazon.lastmile.kotlin.inject.anvil.AppScope
+
+                @Suppress("unused")
+                @Inject
+                @ContributesViewModel(scope = AppScope::class, assistedFactory = TestViewModel.Factory::class)
+                class TestViewModel(@Assisted dependency: String): ViewModel() {
+                    @AssistedFactory
+                    interface Factory {
+                        operator fun invoke(dependency: String): ViewModel
+                    }
+                }
+            """
+        ) {
+            exitCode shouldBe KotlinCompilation.ExitCode.COMPILATION_ERROR
+            messages shouldContain "ViewModel assisted factory must return this ViewModel: com.teobaranga.kotlin.inject.viewmodel.compiler.test.TestViewModel"
+        }
+    }
+
+    @Test
     fun `ViewModel with base class extending ViewModel generates correct component`() {
         compile(
             SourceFile.kotlin("TestViewModel.kt", """
@@ -254,7 +333,7 @@ class ContributesViewModelSymbolProcessorTest {
     }
 
     @Test
-    fun `ViewModel with assisted dependency generates correct component`() {
+    fun `ViewModel with single assisted dependency generates correct component`() {
         compile(
             SourceFile.kotlin(
                 "TestViewModel.kt", """
@@ -263,13 +342,19 @@ class ContributesViewModelSymbolProcessorTest {
                 import androidx.lifecycle.ViewModel
                 import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
                 import me.tatarka.inject.annotations.Assisted
+                import me.tatarka.inject.annotations.AssistedFactory
                 import me.tatarka.inject.annotations.Inject
                 import software.amazon.lastmile.kotlin.inject.anvil.AppScope
 
                 @Suppress("unused")
                 @Inject
-                @ContributesViewModel(AppScope::class)
-                class TestViewModel(@Assisted private val dependency: Dependency): ViewModel()
+                @ContributesViewModel(scope = AppScope::class, assistedFactory = TestViewModel.Factory::class)
+                class TestViewModel(@Assisted private val dependency: Dependency): ViewModel() {
+                    @AssistedFactory
+                    interface Factory {
+                        operator fun invoke(dependency: Dependency): TestViewModel                    
+                    }
+                }
             """
             ),
             SourceFile.kotlin(
@@ -292,7 +377,7 @@ class ContributesViewModelSymbolProcessorTest {
 
                 annotations shouldBe listOf(Provides(), IntoMap())
 
-                // Provider function should take in the assisted ViewModel factory: TestViewModelFactory
+                // Provider function should take in the assisted ViewModel factory: TestViewModel.Factory
                 with(valueParameters.single()) {
                     type shouldBe testViewModelFactoryClass.createType()
                 }
@@ -313,22 +398,34 @@ class ContributesViewModelSymbolProcessorTest {
     }
 
     @Test
-    fun `ViewModel with assisted dependency generates correct factory`() {
+    fun `ViewModel with multiple assisted dependencies generates correct component`() {
         compile(
             SourceFile.kotlin(
                 "TestViewModel.kt", """
                 package com.teobaranga.kotlin.inject.viewmodel.compiler.test
 
+                import androidx.lifecycle.SavedStateHandle
                 import androidx.lifecycle.ViewModel
                 import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
                 import me.tatarka.inject.annotations.Assisted
+                import me.tatarka.inject.annotations.AssistedFactory
                 import me.tatarka.inject.annotations.Inject
                 import software.amazon.lastmile.kotlin.inject.anvil.AppScope
 
                 @Suppress("unused")
                 @Inject
-                @ContributesViewModel(AppScope::class)
-                class TestViewModel(@Assisted private val dependency: Dependency): ViewModel()
+                @ContributesViewModel(scope = AppScope::class, assistedFactory = TestViewModel.Factory::class)
+                class TestViewModel(
+                    @Assisted
+                    private val savedStateHandle: SavedStateHandle,
+                    @Assisted
+                    private val dependency: Dependency,
+                ): ViewModel() {
+                    @AssistedFactory
+                    interface Factory {
+                        operator fun invoke(savedStateHandle: SavedStateHandle, dependency: Dependency): TestViewModel                    
+                    }
+                }
             """
             ),
             SourceFile.kotlin(
@@ -344,47 +441,6 @@ class ContributesViewModelSymbolProcessorTest {
         ) {
             exitCode shouldBe KotlinCompilation.ExitCode.OK
 
-            with(testViewModelFactoryClass) {
-                annotations.single() shouldBe Inject()
-
-                primaryConstructor!!.valueParameters.single().type shouldBe Function1::class.createType(
-                    listOf(
-                        KTypeProjection(KVariance.INVARIANT, dependencyClass.createType()),
-                        KTypeProjection(KVariance.INVARIANT, testViewModelClass.createType()),
-                    )
-                )
-
-                with(declaredFunctions.single()) {
-                    valueParameters.single().type shouldBe dependencyClass.createType()
-                    returnType shouldBe testViewModelClass.createType()
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `ViewModel with SavedStateHandle dependency generates correct component`() {
-        compile(
-            SourceFile.kotlin(
-                "TestViewModel.kt", """
-                package com.teobaranga.kotlin.inject.viewmodel.compiler.test
-
-                import androidx.lifecycle.SavedStateHandle
-                import androidx.lifecycle.ViewModel
-                import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
-                import me.tatarka.inject.annotations.Assisted
-                import me.tatarka.inject.annotations.Inject
-                import software.amazon.lastmile.kotlin.inject.anvil.AppScope
-
-                @Suppress("unused")
-                @Inject
-                @ContributesViewModel(AppScope::class)
-                class TestViewModel(@Assisted private val savedStateHandle: SavedStateHandle): ViewModel()
-            """
-            ),
-        ) {
-            exitCode shouldBe KotlinCompilation.ExitCode.OK
-
             testViewModelComponentClass.annotations.single() shouldBe ContributesTo(AppScope::class)
 
             with(testViewModelComponentClass.declaredFunctions.single()) {
@@ -392,18 +448,12 @@ class ContributesViewModelSymbolProcessorTest {
 
                 annotations shouldBe listOf(Provides(), IntoMap())
 
-                // Provider function should take in a factory with assisted SavedStateHandle:
-                // (SavedStateHandle) -> TestViewModel
+                // Provider function should take in the assisted ViewModel factory: TestViewModel.Factory
                 with(valueParameters.single()) {
-                    type shouldBe Function1::class.createType(
-                        listOf(
-                            KTypeProjection(KVariance.INVARIANT, savedStateHandleClass.createType()),
-                            KTypeProjection(KVariance.INVARIANT, testViewModelClass.createType()),
-                        )
-                    )
+                    type shouldBe testViewModelFactoryClass.createType()
                 }
 
-                // Pair<KClass<out ViewModel>, (SavedStateHandle) -> ViewModel>
+                // Pair<KClass<out ViewModel>, Any>
                 returnType shouldBe Pair::class.createType(
                     listOf(
                         KTypeProjection(
@@ -411,14 +461,7 @@ class ContributesViewModelSymbolProcessorTest {
                                 listOf(KTypeProjection(KVariance.OUT, viewModelClass.createType()))
                             )
                         ),
-                        KTypeProjection(
-                            KVariance.INVARIANT, Function1::class.createType(
-                                listOf(
-                                    KTypeProjection(KVariance.INVARIANT, savedStateHandleClass.createType()),
-                                    KTypeProjection(KVariance.INVARIANT, viewModelClass.createType())
-                                )
-                            )
-                        )
+                        KTypeProjection(KVariance.INVARIANT, typeOf<Any>())
                     ),
                 )
             }

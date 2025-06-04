@@ -31,4 +31,5 @@ annotation class ContributesViewModel(
      * The scope in which to include this `ViewModel`.
      */
     val scope: KClass<*>,
+    val assistedFactory: KClass<*> = Unit::class,
 )
