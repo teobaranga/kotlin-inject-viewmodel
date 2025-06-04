@@ -13,11 +13,6 @@ val JvmCompilationResult.viewModelClass
         .loadClass("androidx.lifecycle.ViewModel")
         .kotlin
 
-val JvmCompilationResult.savedStateHandleClass
-    get() = classLoader
-        .loadClass("androidx.lifecycle.SavedStateHandle")
-        .kotlin
-
 val JvmCompilationResult.testViewModelClass
     get() = classLoader
         .loadClass("$TEST_PACKAGE.TestViewModel")
@@ -25,17 +20,12 @@ val JvmCompilationResult.testViewModelClass
 
 val JvmCompilationResult.testViewModelFactoryClass
     get() = classLoader
-        .loadClass("$TEST_PACKAGE.TestViewModelFactory")
+        .loadClass("$TEST_PACKAGE.TestViewModel\$Factory")
         .kotlin
 
 val JvmCompilationResult.testViewModelComponentClass
     get() = classLoader
         .loadClass("$TEST_PACKAGE.TestViewModelComponent")
-        .kotlin
-
-val JvmCompilationResult.dependencyClass
-    get() = classLoader
-        .loadClass("$TEST_PACKAGE.Dependency")
         .kotlin
 
 val JvmCompilationResult.appScopeViewModelFactoryComponentClass

@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.createSavedStateHandle
 import com.teobaranga.kotlin.inject.viewmodel.runtime.compose.injectedViewModel
 import kotlinx.serialization.Serializable
 import kotlin.random.Random
@@ -36,8 +37,12 @@ fun MainScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            val viewModel = injectedViewModel<SavedStateHandleViewModel>()
-            val assistedViewModel = injectedViewModel<AssistedViewModel, AssistedViewModelFactory>(
+            val viewModel = injectedViewModel<SavedStateHandleViewModel, SavedStateHandleViewModel.Factory>(
+                creationCallback = { factory ->
+                    factory(createSavedStateHandle())
+                },
+            )
+            val assistedViewModel = injectedViewModel<AssistedViewModel, AssistedViewModel.Factory>(
                 creationCallback = { factory ->
                     val luckyNumber = Random.nextInt(LUCKY_NUMBER_RANGE)
                     factory(luckyNumber)

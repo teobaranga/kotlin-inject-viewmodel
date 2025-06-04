@@ -1,9 +1,7 @@
 package com.teobaranga.kotlin.inject.viewmodel.sample.user
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
-import com.teobaranga.kotlin.inject.viewmodel.sample.SavedStateViewModelMap
 import com.teobaranga.kotlin.inject.viewmodel.sample.ViewModelFactoryMap
 import com.teobaranga.kotlin.inject.viewmodel.sample.ViewModelMap
 import me.tatarka.inject.annotations.Provides
@@ -27,13 +25,7 @@ interface UserViewModelMapComponent {
     val viewModelMap: ViewModelMap
 
     /**
-     * Map of ViewModel factories that just require a [SavedStateHandle].
-     */
-    @ForScope(UserScope::class)
-    val savedStateViewModelMap: SavedStateViewModelMap
-
-    /**
-     * Map of advanced ViewModel factories that require one or more assisted dependencies outside of [SavedStateHandle].
+     * Map of advanced ViewModel factories that require one or more assisted dependencies.
      */
     @ForScope(UserScope::class)
     val viewModelFactoryMap: ViewModelFactoryMap
@@ -44,13 +36,6 @@ interface UserViewModelMapComponent {
     fun provideSimpleViewModelMap(
         map: Map<KClass<out ViewModel>, () -> ViewModel>
     ): ViewModelMap = map
-
-    @Provides
-    @SingleIn(UserScope::class)
-    @ForScope(UserScope::class)
-    fun provideSavedStateViewModelMap(
-        map: Map<KClass<out ViewModel>, (SavedStateHandle) -> ViewModel>
-    ): SavedStateViewModelMap = map
 
     @Provides
     @SingleIn(UserScope::class)

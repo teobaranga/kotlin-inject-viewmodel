@@ -12,11 +12,8 @@ import com.google.devtools.ksp.processing.SymbolProcessorProvider
 import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.ksp.toClassName
-import com.squareup.kotlinpoet.ksp.toTypeName
 import com.teobaranga.kotlin.inject.viewmodel.compiler.env.EnvironmentOwner
-import com.teobaranga.kotlin.inject.viewmodel.compiler.util.SavedStateHandleClassName
-import com.teobaranga.kotlin.inject.viewmodel.compiler.util.ViewModelClassName
-import com.teobaranga.kotlin.inject.viewmodel.compiler.util.getAssistedParametersTypes
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.CommonClassNames
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.getNewSymbolsWithAnnotation
 import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
 import me.tatarka.inject.annotations.Inject
@@ -40,7 +37,6 @@ import me.tatarka.inject.annotations.Inject
 internal class ContributesViewModelSymbolProcessor(
     override val env: SymbolProcessorEnvironment,
     private val viewModelComponentGenerator: ViewModelComponentGenerator,
-    private val assistedViewModelFactoryGenerator: AssistedViewModelFactoryGenerator,
     private val viewModelFactoryComponentGenerator: ViewModelFactoryComponentGenerator,
 ) : SymbolProcessor, EnvironmentOwner {
 
@@ -51,7 +47,6 @@ internal class ContributesViewModelSymbolProcessor(
             return ContributesViewModelSymbolProcessor(
                 env = environment,
                 viewModelComponentGenerator = ViewModelComponentGenerator(environment),
-                assistedViewModelFactoryGenerator = AssistedViewModelFactoryGenerator(environment),
                 viewModelFactoryComponentGenerator = ViewModelFactoryComponentGenerator(environment),
             )
         }
@@ -64,13 +59,6 @@ internal class ContributesViewModelSymbolProcessor(
             .filterIsInstance<KSClassDeclaration>()
             .forEach { annotatedClass ->
                 validate(annotatedClass)
-
-                // Generate a factory class for ViewModels with non-SavedStateHandle assisted parameters
-                val assistedParameters = annotatedClass.getAssistedParametersTypes()
-                if (assistedParameters.any { it != SavedStateHandleClassName }) {
-                    assistedViewModelFactoryGenerator.generate(annotatedClass)
-                }
-
                 viewModelComponentGenerator.generate(annotatedClass)
             }
 
@@ -94,7 +82,7 @@ internal class ContributesViewModelSymbolProcessor(
     }
 
     private fun KSClassDeclaration.extendsViewModel(): Boolean {
-        return getAllSuperTypes().any { it.toTypeName() == ViewModelClassName }
+        return getAllSuperTypes().any { it.declaration.qualifiedName!!.asString() == CommonClassNames.VIEW_MODEL }
     }
 
     @OptIn(KspExperimental::class)
