@@ -1,6 +1,9 @@
 package com.teobaranga.kotlin.inject.viewmodel.compiler
 
+import com.google.devtools.ksp.closestClassDeclaration
+import com.google.devtools.ksp.getDeclaredFunctions
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
+import com.google.devtools.ksp.symbol.KSAnnotation
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSType
 import com.squareup.kotlinpoet.AnnotationSpec
@@ -10,7 +13,6 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.LambdaTypeName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.WildcardTypeName
 import com.squareup.kotlinpoet.asClassName
@@ -20,11 +22,13 @@ import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import com.teobaranga.kotlin.inject.viewmodel.compiler.env.EnvironmentOwner
-import com.teobaranga.kotlin.inject.viewmodel.compiler.util.SavedStateHandleClassName
-import com.teobaranga.kotlin.inject.viewmodel.compiler.util.ViewModelClassName
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.CommonClassNames
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.getArgumentByName
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.getAssistedParametersTypes
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.qualifiedName
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.simpleShortName
 import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
+import me.tatarka.inject.annotations.AssistedFactory
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.Provides
 import software.amazon.lastmile.kotlin.inject.anvil.ContributesTo
@@ -41,9 +45,8 @@ internal class ViewModelComponentGenerator(
     fun generate(annotatedClass: KSClassDeclaration) {
         val packageName = annotatedClass.qualifiedName?.getQualifier().orEmpty()
         val fileName = "${annotatedClass.simpleShortName}Component"
-        val scope = getScope(annotatedClass)
         FileSpec.builder(packageName, fileName)
-            .addType(generateComponentInterface(annotatedClass, scope))
+            .addType(generateComponentInterface(annotatedClass))
             .build()
             .writeTo(codeGenerator = env.codeGenerator, aggregating = false)
     }
@@ -52,12 +55,13 @@ internal class ViewModelComponentGenerator(
      * Generate the kotlin-inject component interface that uses anvil to contribute the ViewModel factory to the
      * right map.
      */
-    private fun generateComponentInterface(annotatedClass: KSClassDeclaration, scope: TypeName): TypeSpec {
+    private fun generateComponentInterface(annotatedClass: KSClassDeclaration): TypeSpec {
         val interfaceName = "${annotatedClass.simpleShortName}Component"
+        val scope = annotatedClass.requireViewModelScope()
         return TypeSpec.interfaceBuilder(interfaceName)
             .addAnnotation(
                 AnnotationSpec.builder(ContributesTo::class)
-                    .addMember("%T::class", scope)
+                    .addMember("%T::class", scope.toTypeName())
                     .build(),
             )
             .addFunction(generateProviderFunction(annotatedClass))
@@ -70,21 +74,19 @@ internal class ViewModelComponentGenerator(
      *
      * The factory can be either
      * - a simple lambda that returns the ViewModel in case there are no assisted parameters
-     * - a lambda that takes in a `SavedStateHandle` and returns a ViewModel
-     * - `Any` representing the factory of a more complex ViewModel that has at least one non-SavedStateHandle parameter
+     * - an @AssistedFactory type that returns the ViewModel in case there are assisted parameters
      */
     private fun generateProviderFunction(annotatedClass: KSClassDeclaration): FunSpec {
         val assistedParameters = annotatedClass.getAssistedParametersTypes()
 
         val viewModelClassName = annotatedClass.simpleShortName
 
-        val packageName = annotatedClass.qualifiedName?.getQualifier().orEmpty()
         val parameter = ParameterSpec
             .builder(
                 name = "factory",
                 type = when {
-                    assistedParameters.any { it != SavedStateHandleClassName } -> {
-                        ClassName.bestGuess("$packageName.${viewModelClassName}Factory")
+                    assistedParameters.isNotEmpty() -> {
+                        annotatedClass.requireViewModelAssistedFactory().toClassName()
                     }
 
                     else -> LambdaTypeName.get(
@@ -96,18 +98,19 @@ internal class ViewModelComponentGenerator(
             .build()
 
         // Pair<KClass<out ViewModel>, () -> ViewModel> or
-        // Pair<KClass<out ViewModel>, (SavedStateHandle) -> ViewModel> or
         // Pair<KClass<out ViewModel>, Any>
         val returnType = Pair::class.asClassName().parameterizedBy(
-            KClass::class.asClassName().parameterizedBy(WildcardTypeName.producerOf(ViewModelClassName)),
+            KClass::class.asClassName().parameterizedBy(
+                WildcardTypeName.producerOf(ClassName.bestGuess(CommonClassNames.VIEW_MODEL))
+            ),
             when {
-                assistedParameters.any { it != SavedStateHandleClassName } -> {
+                assistedParameters.isNotEmpty() -> {
                     Any::class.asTypeName()
                 }
 
                 else -> LambdaTypeName.get(
                     parameters = assistedParameters,
-                    returnType = ViewModelClassName,
+                    returnType = ClassName.bestGuess(CommonClassNames.VIEW_MODEL),
                 )
             },
         )
@@ -121,20 +124,52 @@ internal class ViewModelComponentGenerator(
             .build()
     }
 
-    private fun getScope(element: KSClassDeclaration): TypeName {
+    private fun KSClassDeclaration.requireViewModelScope(): KSType {
         // There is a simpler way to do this using the experimental getAnnotationsByType, however it doesn't
         // work when attempting to retrieve the type of the scope argument if it's not on this project's classpath.
-        val annotation = element.annotations
-            .first { annotation ->
-                val clazz = ContributesViewModel::class
-                annotation.shortName.asString() == clazz.simpleName
-                    && annotation.annotationType.resolve().declaration.qualifiedName?.asString() == clazz.qualifiedName
-            }
-        val scopeArgument = annotation.arguments
-            .first { argument ->
-                argument.name?.asString() == ContributesViewModel::scope.name
-            }
+        return contributesViewModelAnnotation.getArgumentByName(ContributesViewModel::scope.name)
             .value as KSType
-        return scopeArgument.toTypeName()
+    }
+
+    private fun KSClassDeclaration.requireViewModelAssistedFactory(): KSClassDeclaration {
+        // There is a simpler way to do this using the experimental getAnnotationsByType, however it doesn't
+        // work when attempting to retrieve the type of the factory argument if it's not on this project's classpath.
+        val scopeArgument = contributesViewModelAnnotation.getArgumentByName(ContributesViewModel::assistedFactory.name)
+            .value as KSType
+        val factoryType = scopeArgument.declaration.closestClassDeclaration()!!
+        when {
+            factoryType.qualifiedName!!.asString() == Unit::class.qualifiedName -> {
+                env.logger.error(
+                    message = "ViewModels with @Assisted parameters must have an @AssistedFactory declared: ${qualifiedName!!.asString()}",
+                    symbol = this,
+                )
+            }
+
+            factoryType.annotations.none { it.isOfType<AssistedFactory>() } -> {
+                env.logger.error(
+                    message = "ViewModel assisted factory must be an @AssistedFactory: ${qualifiedName!!.asString()}",
+                    symbol = this,
+                )
+            }
+
+            factoryType.getDeclaredFunctions().none { it.returnType?.qualifiedName == qualifiedName } -> {
+                env.logger.error(
+                    message = "ViewModel assisted factory must return this ViewModel: ${qualifiedName!!.asString()}",
+                    symbol = factoryType,
+                )
+            }
+        }
+        return factoryType
+    }
+
+    private val KSClassDeclaration.contributesViewModelAnnotation: KSAnnotation
+        get() = annotations
+            .first { annotation ->
+                annotation.isOfType<ContributesViewModel>()
+            }
+
+    private inline fun <reified T : Any> KSAnnotation.isOfType(): Boolean {
+        return shortName.asString() == T::class.simpleName
+            && annotationType.resolve().declaration.qualifiedName?.asString() == T::class.qualifiedName
     }
 }

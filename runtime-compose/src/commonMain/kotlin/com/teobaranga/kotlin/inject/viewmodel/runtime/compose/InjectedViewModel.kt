@@ -11,7 +11,6 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
 import com.teobaranga.kotlin.inject.viewmodel.runtime.withCreationCallback
-import me.tatarka.inject.annotations.Assisted
 
 val LocalViewModelFactoryOwner = staticCompositionLocalOf<ViewModelFactoryOwner> {
     error("No ViewModelFactoryOwner was provided provided via LocalViewModelFactoryOwner")
@@ -45,9 +44,7 @@ inline fun <reified VM : ViewModel> injectedViewModel(
  * [ViewModelStoreOwner]. This can be a navigation backstack entry, a fragment, or an activity.
  *
  * This overload takes in a ViewModel factory type that can be used to create ViewModels with
- * assisted parameters (outside of `SavedStateHandle`, which doesn't need a factory). ViewModel
- * factories are automatically created by kotlin-inject for ViewModels with [Assisted]-annotated
- * parameters that have a type other than `SavedStateHandle`. They factories are named `{ViewModel}Factory`.
+ * assisted parameters. This also applies to ViewModels that have an `@Assisted SavedStateHandle` dependency.
  *
  * Requires a [LocalViewModelFactoryOwner] to be set in the composition tree.
  *
@@ -60,7 +57,7 @@ inline fun <reified VM : ViewModel, reified VMF> injectedViewModel(
     },
     key: String? = null,
     factory: ViewModelProvider.Factory? = LocalViewModelFactoryOwner.current.viewModelFactory,
-    noinline creationCallback: (VMF) -> VM,
+    noinline creationCallback: CreationExtras.(VMF) -> VM,
 ): VM {
     return viewModel<VM>(
         viewModelStoreOwner = viewModelStoreOwner,

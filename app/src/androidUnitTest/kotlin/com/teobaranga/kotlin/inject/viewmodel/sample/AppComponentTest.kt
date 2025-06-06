@@ -30,14 +30,16 @@ class AppComponentTest {
     }
 
     @Test
-    fun `SavedStateHandle map contains ViewModel with @Assisted SavedStateHandle`() {
+    fun `Assisted map contains ViewModel with @Assisted SavedStateHandle`() {
         val component = AppComponent::class.create()
-        val factory = requireNotNull(component.savedStateViewModelMap[SavedStateHandleViewModel::class]) {
+        val factory = requireNotNull(component.viewModelFactoryMap[SavedStateHandleViewModel::class]) {
             "Factory for ViewModel with @Assisted SavedStateHandle not found"
+        }
+        if (factory !is SavedStateHandleViewModel.Factory) {
+            error("Factory for ViewModel with @Assisted SavedStateHandle does not have the correct type")
         }
         val viewModel = factory(SavedStateHandle())
         assertNotNull(viewModel)
-        viewModel as SavedStateHandleViewModel
         assertNotNull(viewModel.userName)
     }
 
@@ -47,7 +49,7 @@ class AppComponentTest {
         val factory = requireNotNull(component.viewModelFactoryMap[AssistedViewModel::class]) {
             "Factory for ViewModel with @Assisted dependency not found"
         }
-        if (factory !is AssistedViewModelFactory) {
+        if (factory !is AssistedViewModel.Factory) {
             error("Factory for ViewModel with @Assisted dependency does not have the correct type")
         }
         val viewModel = factory(123)
@@ -61,11 +63,10 @@ class AppComponentTest {
         val factory = requireNotNull(component.viewModelFactoryMap[AssistedDepSavedStateHandleViewModel::class]) {
             "Factory for ViewModel with @Assisted SavedStateHandle & dependency not found"
         }
-        if (factory !is AssistedDepSavedStateHandleViewModelFactory) {
+        if (factory !is AssistedDepSavedStateHandleViewModel.Factory) {
             error("Factory for ViewModel with @Assisted SavedStateHandle & dependency does not have the correct type")
         }
-        factory.savedStateHandle = SavedStateHandle()
-        val viewModel = factory(Dep())
+        val viewModel = factory(SavedStateHandle(), Dep())
         assertNotNull(viewModel)
     }
 
@@ -75,11 +76,10 @@ class AppComponentTest {
         val factory = requireNotNull(component.viewModelFactoryMap[OrderAssistedDepSavedStateHandleViewModel::class]) {
             "Factory for ViewModel with @Assisted dependency & SavedStateHandle not found"
         }
-        if (factory !is OrderAssistedDepSavedStateHandleViewModelFactory) {
+        if (factory !is OrderAssistedDepSavedStateHandleViewModel.Factory) {
             error("Factory for ViewModel with @Assisted dependency & SavedStateHandle does not have the correct type")
         }
-        factory.savedStateHandle = SavedStateHandle()
-        val viewModel = factory(Dep())
+        val viewModel = factory(Dep(), SavedStateHandle())
         assertNotNull(viewModel)
     }
 }

@@ -39,7 +39,6 @@ dependencies {
   injection strategy for ViewModels
 - Compose and Activity/Fragment support
 - Support all types of ViewModels, both with injected dependencies and with assisted dependencies
-- Automatic handling of `@Assisted SavedStateHandle` dependencies
 
 ## Usage
 
