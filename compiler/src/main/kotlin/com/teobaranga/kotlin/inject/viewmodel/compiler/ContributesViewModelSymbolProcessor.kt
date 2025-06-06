@@ -13,7 +13,7 @@ import com.google.devtools.ksp.symbol.KSAnnotated
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.teobaranga.kotlin.inject.viewmodel.compiler.env.EnvironmentOwner
-import com.teobaranga.kotlin.inject.viewmodel.compiler.util.androidx_lifecycle_ViewModel
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.CommonClassNames
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.getNewSymbolsWithAnnotation
 import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
 import me.tatarka.inject.annotations.Inject
@@ -82,7 +82,7 @@ internal class ContributesViewModelSymbolProcessor(
     }
 
     private fun KSClassDeclaration.extendsViewModel(): Boolean {
-        return getAllSuperTypes().any { it.declaration.qualifiedName!!.asString() == androidx_lifecycle_ViewModel }
+        return getAllSuperTypes().any { it.declaration.qualifiedName!!.asString() == CommonClassNames.VIEW_MODEL }
     }
 
     @OptIn(KspExperimental::class)

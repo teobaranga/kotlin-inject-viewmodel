@@ -3,8 +3,6 @@ package com.teobaranga.kotlin.inject.viewmodel.compiler
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.VIEW_MODEL_FACTORY_FQ_NAME
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.appScopeViewModelFactoryComponentClass
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.compile
-import com.teobaranga.kotlin.inject.viewmodel.compiler.util.dependencyClass
-import com.teobaranga.kotlin.inject.viewmodel.compiler.util.savedStateHandleClass
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.testViewModelClass
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.testViewModelComponentClass
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.testViewModelFactoryClass
@@ -15,7 +13,6 @@ import com.tschuchort.compiletesting.KotlinCompilation
 import com.tschuchort.compiletesting.SourceFile
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
-import me.tatarka.inject.annotations.Inject
 import me.tatarka.inject.annotations.IntoMap
 import me.tatarka.inject.annotations.Provides
 import org.jetbrains.kotlin.compiler.plugin.ExperimentalCompilerApi
@@ -29,7 +26,6 @@ import kotlin.reflect.KTypeProjection
 import kotlin.reflect.KVariance
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.declaredFunctions
-import kotlin.reflect.full.primaryConstructor
 import kotlin.reflect.full.valueParameters
 import kotlin.reflect.typeOf
 
@@ -159,7 +155,8 @@ class ContributesViewModelSymbolProcessorTest {
     @Test
     fun `ViewModel with base class extending ViewModel generates correct component`() {
         compile(
-            SourceFile.kotlin("TestViewModel.kt", """
+            SourceFile.kotlin(
+                "TestViewModel.kt", """
                 package com.teobaranga.kotlin.inject.viewmodel.compiler.test
 
                 import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
@@ -170,15 +167,18 @@ class ContributesViewModelSymbolProcessorTest {
                 @Inject
                 @ContributesViewModel(AppScope::class)
                 class TestViewModel(): BaseViewModel()
-            """),
-            SourceFile.kotlin("BaseViewModel.kt", """
+            """
+            ),
+            SourceFile.kotlin(
+                "BaseViewModel.kt", """
                 package com.teobaranga.kotlin.inject.viewmodel.compiler.test
 
                 import androidx.lifecycle.ViewModel
 
                 @Suppress("unused")
                 abstract class BaseViewModel(): ViewModel()
-            """)
+            """
+            )
         ) {
             exitCode shouldBe KotlinCompilation.ExitCode.OK
 

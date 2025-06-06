@@ -13,7 +13,6 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.LambdaTypeName
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.TypeName
 import com.squareup.kotlinpoet.TypeSpec
 import com.squareup.kotlinpoet.WildcardTypeName
 import com.squareup.kotlinpoet.asClassName
@@ -23,7 +22,8 @@ import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.toTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 import com.teobaranga.kotlin.inject.viewmodel.compiler.env.EnvironmentOwner
-import com.teobaranga.kotlin.inject.viewmodel.compiler.util.androidx_lifecycle_ViewModel
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.CommonClassNames
+import com.teobaranga.kotlin.inject.viewmodel.compiler.util.getArgumentByName
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.getAssistedParametersTypes
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.qualifiedName
 import com.teobaranga.kotlin.inject.viewmodel.compiler.util.simpleShortName
@@ -45,9 +45,8 @@ internal class ViewModelComponentGenerator(
     fun generate(annotatedClass: KSClassDeclaration) {
         val packageName = annotatedClass.qualifiedName?.getQualifier().orEmpty()
         val fileName = "${annotatedClass.simpleShortName}Component"
-        val scope = getScope(annotatedClass)
         FileSpec.builder(packageName, fileName)
-            .addType(generateComponentInterface(annotatedClass, scope))
+            .addType(generateComponentInterface(annotatedClass))
             .build()
             .writeTo(codeGenerator = env.codeGenerator, aggregating = false)
     }
@@ -56,12 +55,13 @@ internal class ViewModelComponentGenerator(
      * Generate the kotlin-inject component interface that uses anvil to contribute the ViewModel factory to the
      * right map.
      */
-    private fun generateComponentInterface(annotatedClass: KSClassDeclaration, scope: TypeName): TypeSpec {
+    private fun generateComponentInterface(annotatedClass: KSClassDeclaration): TypeSpec {
         val interfaceName = "${annotatedClass.simpleShortName}Component"
+        val scope = annotatedClass.requireViewModelScope()
         return TypeSpec.interfaceBuilder(interfaceName)
             .addAnnotation(
                 AnnotationSpec.builder(ContributesTo::class)
-                    .addMember("%T::class", scope)
+                    .addMember("%T::class", scope.toTypeName())
                     .build(),
             )
             .addFunction(generateProviderFunction(annotatedClass))
@@ -86,7 +86,7 @@ internal class ViewModelComponentGenerator(
                 name = "factory",
                 type = when {
                     assistedParameters.isNotEmpty() -> {
-                        annotatedClass.requireAssistedFactory().toClassName()
+                        annotatedClass.requireViewModelAssistedFactory().toClassName()
                     }
 
                     else -> LambdaTypeName.get(
@@ -101,7 +101,7 @@ internal class ViewModelComponentGenerator(
         // Pair<KClass<out ViewModel>, Any>
         val returnType = Pair::class.asClassName().parameterizedBy(
             KClass::class.asClassName().parameterizedBy(
-                WildcardTypeName.producerOf(ClassName.bestGuess(androidx_lifecycle_ViewModel))
+                WildcardTypeName.producerOf(ClassName.bestGuess(CommonClassNames.VIEW_MODEL))
             ),
             when {
                 assistedParameters.isNotEmpty() -> {
@@ -110,7 +110,7 @@ internal class ViewModelComponentGenerator(
 
                 else -> LambdaTypeName.get(
                     parameters = assistedParameters,
-                    returnType = ClassName.bestGuess(androidx_lifecycle_ViewModel),
+                    returnType = ClassName.bestGuess(CommonClassNames.VIEW_MODEL),
                 )
             },
         )
@@ -124,25 +124,17 @@ internal class ViewModelComponentGenerator(
             .build()
     }
 
-    private fun getScope(element: KSClassDeclaration): TypeName {
+    private fun KSClassDeclaration.requireViewModelScope(): KSType {
         // There is a simpler way to do this using the experimental getAnnotationsByType, however it doesn't
         // work when attempting to retrieve the type of the scope argument if it's not on this project's classpath.
-        val scopeArgument = element.contributesViewModelAnnotation.arguments
-            .first { argument ->
-                argument.name?.asString() == ContributesViewModel::scope.name
-            }
+        return contributesViewModelAnnotation.getArgumentByName(ContributesViewModel::scope.name)
             .value as KSType
-        return scopeArgument.toTypeName()
     }
 
-    private fun KSClassDeclaration.requireAssistedFactory(): KSClassDeclaration {
+    private fun KSClassDeclaration.requireViewModelAssistedFactory(): KSClassDeclaration {
         // There is a simpler way to do this using the experimental getAnnotationsByType, however it doesn't
         // work when attempting to retrieve the type of the factory argument if it's not on this project's classpath.
-        env.logger.info("Getting assisted factory for: $this")
-        val scopeArgument = contributesViewModelAnnotation.arguments
-            .first { argument ->
-                argument.name?.asString() == ContributesViewModel::assistedFactory.name
-            }
+        val scopeArgument = contributesViewModelAnnotation.getArgumentByName(ContributesViewModel::assistedFactory.name)
             .value as KSType
         val factoryType = scopeArgument.declaration.closestClassDeclaration()!!
         when {
