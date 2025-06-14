@@ -29,17 +29,15 @@ dependencies {
 }
 ```
 
-> [!NOTE]  
-> This library depends on `androidx.lifecycle` 2.9.0-rc01 because this is where support for KMP ViewModel
-> was introduced. Make sure you're okay introducing a pre-release version into your project before using this library.
-
 ## Features
 
 - Plugs in nicely into existing projects using Hilt wanting to migrate to kotlin-inject without requiring a different
   injection strategy for ViewModels
 - Compose and Activity/Fragment support
 - Support all types of ViewModels, both with injected dependencies and with assisted dependencies
-- Automatic handling of `@Assisted SavedStateHandle` dependencies
+
+### TODO
+- [ ] Automatic injection of SavedStateHandle dependencies
 
 ## Usage
 
@@ -111,10 +109,17 @@ class MyActivity : ComponentActivity() {
 
 ```kotlin
 @Inject
-@ContributesViewModel(AppScope::class)
-class MyViewModel(@Assisted val foo: Foo) : ViewModel()
-
-// ... Generates a MyViewModelFactory
+@ContributesViewModel(
+    scope = AppScope::class,
+    assistedFactory = MyViewModel.Factory::class,
+)
+class MyViewModel(@Assisted val foo: Foo) : ViewModel() {
+    
+    @AssistedFactory
+    interface Factory {
+        operator fun invoke(foo: Foo): MyViewModel
+    }
+}
 
 // Activity:
 class MyActivity : ComponentActivity() {
@@ -124,14 +129,14 @@ class MyActivity : ComponentActivity() {
   
     // Assisted ViewModel
     val myAssistedViewModel by viewModels<MyViewModel>(
-        extras = defaultViewModelCreationExtras.withCreationCallback<MyViewModelFactory> { factory ->
+        extras = defaultViewModelCreationExtras.withCreationCallback<MyViewModel.Factory> { factory ->
             factory(Foo())
         },
     )
 }
 
 // Compose
-val myAssistedViewModel = injectedViewModel<MyViewModel, MyViewModelFactory>(
+val myAssistedViewModel = injectedViewModel<MyViewModel, MyViewModel.Factory>(
     creationCallback = { factory ->
         factory(Foo())
     },

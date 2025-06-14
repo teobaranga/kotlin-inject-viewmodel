@@ -10,8 +10,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.teobaranga.kotlin.inject.viewmodel.runtime.ContributesViewModel
+import com.teobaranga.kotlin.inject.viewmodel.runtime.KotlinInjectViewModelFactory
 import com.teobaranga.kotlin.inject.viewmodel.runtime.withCreationCallback
-import me.tatarka.inject.annotations.Assisted
 
 val LocalViewModelFactoryOwner = staticCompositionLocalOf<ViewModelFactoryOwner> {
     error("No ViewModelFactoryOwner was provided provided via LocalViewModelFactoryOwner")
@@ -21,7 +21,10 @@ val LocalViewModelFactoryOwner = staticCompositionLocalOf<ViewModelFactoryOwner>
  * Returns or creates a [ViewModel] annotated with [ContributesViewModel], scoped to the local
  * [ViewModelStoreOwner]. This can be a navigation backstack entry, a fragment, or an activity.
  *
- * Requires a [LocalViewModelFactoryOwner] to be set in the composition tree.
+ * Requires a [LocalViewModelFactoryOwner] to be set in the composition tree, one that can provide a factory
+ * such as [KotlinInjectViewModelFactory].
+ *
+ * Can only handle ViewModels without assisted dependencies.
  *
  * @see [viewModel]
  */
@@ -45,11 +48,10 @@ inline fun <reified VM : ViewModel> injectedViewModel(
  * [ViewModelStoreOwner]. This can be a navigation backstack entry, a fragment, or an activity.
  *
  * This overload takes in a ViewModel factory type that can be used to create ViewModels with
- * assisted parameters (outside of `SavedStateHandle`, which doesn't need a factory). ViewModel
- * factories are automatically created by kotlin-inject for ViewModels with [Assisted]-annotated
- * parameters that have a type other than `SavedStateHandle`. They factories are named `{ViewModel}Factory`.
+ * assisted parameters, including those with `@Assisted SavedStateHandle` dependencies.
  *
- * Requires a [LocalViewModelFactoryOwner] to be set in the composition tree.
+ * Requires a [LocalViewModelFactoryOwner] to be set in the composition tree, one that can provide a factory
+ * such as [KotlinInjectViewModelFactory].
  *
  * @see [viewModel]
  */
@@ -60,7 +62,7 @@ inline fun <reified VM : ViewModel, reified VMF> injectedViewModel(
     },
     key: String? = null,
     factory: ViewModelProvider.Factory? = LocalViewModelFactoryOwner.current.viewModelFactory,
-    noinline creationCallback: (VMF) -> VM,
+    noinline creationCallback: CreationExtras.(VMF) -> VM,
 ): VM {
     return viewModel<VM>(
         viewModelStoreOwner = viewModelStoreOwner,

@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import me.tatarka.inject.annotations.Assisted
+import me.tatarka.inject.annotations.AssistedFactory
 import software.amazon.lastmile.kotlin.inject.anvil.extend.ContributingAnnotation
 import kotlin.reflect.KClass
 
@@ -16,13 +17,39 @@ import kotlin.reflect.KClass
  * keyed by their type, which can then be used to create instances of the ViewModel through a
  * [ViewModelProvider.Factory].
  *
- * Assisted injection is supported through the [Assisted] annotation. Any assisted [SavedStateHandle] parameter
- * is automatically injected by kotlin-inject. Other types must be manually provided by using the generated factory
- * named `{ViewModel}Factory`.
+ * Assisted injection is supported by providing an [assistedFactory] for the ViewModel. This factory must
+ * annotated with [AssistedFactory] and must have a function that takes the same parameters as the ones
+ * annotated with [Assisted] in the ViewModel's constructor. For example:
+ * ```kotlin
+ * @Inject
+ * @ContributesViewModel(
+ *     scope = AppScope::class,
+ *     assistedFactory = MyAssistedViewModel.Factory::class,
+ * )
+ * class MyAssistedViewModel(
+ *     @Assisted savedStateHandle: SavedStateHandle,
+ *     @Assisted val myDep: Dep,
+ * ) : ViewModel() {
  *
- * In summary, this annotation helps generate the following types in the ViewModel's package:
- * - `{ViewModel}Component`
- * - `{ViewModel}Factory` only if the ViewModel has non-SavedStateHandle assisted dependencies
+ *     @AssistedFactory
+ *     interface Factory {
+ *         operator fun invoke(
+ *             @Assisted savedStateHandle: SavedStateHandle,
+ *             @Assisted myDep: Dep,
+ *         ): MyAssistedViewModel
+ *     }
+ * }
+ * ```
+ *
+ * The ViewModel can then be retrieved by using the factory. For example, in Compose this could be done through
+ * `injectedViewModel()`:
+ * ```kotlin
+ * val viewModel = injectedViewModel<MyAssistedViewModel, MyAssistedViewModel.Factory>(
+ *     creationCallback = { factory ->
+ *         factory(createSavedStateHandle(), Dep())
+ *     },
+ * )
+ * ```
  */
 @Target(AnnotationTarget.CLASS)
 @ContributingAnnotation
@@ -31,4 +58,10 @@ annotation class ContributesViewModel(
      * The scope in which to include this `ViewModel`.
      */
     val scope: KClass<*>,
+    /**
+     * The [AssistedFactory] interface holding a factory function. The function must take the same [Assisted]
+     * parameters as the ViewModel's constructor and return the ViewModel type. See [ContributesViewModel] for an
+     * example.
+     */
+    val assistedFactory: KClass<*> = Unit::class,
 )
