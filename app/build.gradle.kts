@@ -50,10 +50,7 @@ kotlin {
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            // Continue using Google's Material3 1.4.0 alpha APIs by using an older version of
-            // Jetbrain's Material3 library.
-            // https://github.com/JetBrains/compose-multiplatform-core/pull/1868
-            implementation(libs.jetbrains.compose.material3)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
