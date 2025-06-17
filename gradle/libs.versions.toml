@@ -4,7 +4,7 @@
 agp = "8.10.1"
 
 # Plugins
-compose = "1.8.1"
+compose = "1.9.0-alpha02"
 dependency-analysis = "2.18.0"
 kotlin = "2.1.21"
 ksp = "2.1.21-2.0.2"
@@ -34,8 +34,6 @@ auto-service-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", vers
 junit-jupiter-bom = { module = "org.junit:junit-bom", version.ref = "junit-jupiter" }
 junit-jupiter-core = { module = "org.junit.jupiter:junit-jupiter" }
 junit-jupiter-launcher = { module = "org.junit.platform:junit-platform-launcher" }
-# https://github.com/JetBrains/compose-multiplatform-core/pull/1868
-jetbrains-compose-material3 = { module = "org.jetbrains.compose.material3:material3", version = "1.8.0-alpha03" }
 kotest-runner-junit5 = { module = "io.kotest:kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions-core = { module = "io.kotest:kotest-assertions-core", version.ref = "kotest" }
 kotlin-compile-testing-core = { module = "dev.zacsweers.kctfork:core", version.ref = "kotlin-compile-testing" }
