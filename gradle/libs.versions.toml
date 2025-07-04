@@ -22,7 +22,7 @@ kotlin-poet = "2.2.0"
 lifecycle = "2.9.1"
 lifecycle-viewmodel-compose = "2.9.1"
 navigation = "2.9.0-beta03"
-junit-jupiter = "5.13.2"
+junit-jupiter = "5.13.3"
 
 [libraries]
 # Dependencies of the included build-logic
