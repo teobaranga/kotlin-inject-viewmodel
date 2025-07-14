@@ -8,7 +8,7 @@ compose = "1.9.0-alpha03"
 dependency-analysis = "2.19.0"
 kotlin = "2.2.0"
 ksp = "2.2.0-2.0.2"
-maven-publish = "0.33.0"
+maven-publish = "0.34.0"
 
 # Libraries
 activity-compose = "1.10.1"
