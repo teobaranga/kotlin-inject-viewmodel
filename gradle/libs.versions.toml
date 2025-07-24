@@ -21,6 +21,7 @@ kotlin-inject-anvil = "0.1.6"
 kotlin-poet = "2.2.0"
 lifecycle = "2.9.2"
 lifecycle-viewmodel-compose = "2.9.1"
+material3 = "1.9.0-alpha04"
 navigation = "2.9.0-beta04"
 junit-jupiter = "5.13.4"
 
@@ -50,6 +51,7 @@ ksp-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.re
 lifecycle-viewmodel = { group = "androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "lifecycle" }
 lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle-viewmodel-compose" }
 lifecycle-viewmodel-savedstate = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-savedstate", version.ref = "lifecycle" }
+material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3" }
 navigation = { group = "org.jetbrains.androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 
 [plugins]
