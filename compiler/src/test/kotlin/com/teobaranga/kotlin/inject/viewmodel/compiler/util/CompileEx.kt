@@ -23,7 +23,7 @@ fun compile(vararg sources: SourceFile, block: JvmCompilationResult.() -> Unit) 
         verbose = false
         messageOutputStream = System.out
         this.sources = sources.toList()
-        configureKsp(useKsp2 = true) {
+        configureKsp {
             languageVersion = "2.0"
             symbolProcessorProviders += ContributesViewModelSymbolProcessor.Provider()
             allWarningsAsErrors = true
