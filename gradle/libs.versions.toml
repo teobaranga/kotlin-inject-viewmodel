@@ -6,8 +6,8 @@ agp = "8.13.2"
 # Plugins
 compose = "1.9.3"
 dependency-analysis = "3.5.1"
-kotlin = "2.2.21"
-ksp = "2.3.3"
+kotlin = "2.3.0"
+ksp = "2.3.4"
 maven-publish = "0.35.0"
 
 # Libraries
