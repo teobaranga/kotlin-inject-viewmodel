@@ -47,3 +47,4 @@ rootProject.name = "Kotlin Inject ViewModel"
 include(":app")
 include(":compiler")
 include(":runtime", ":runtime-compose")
+include(":androidApp")
