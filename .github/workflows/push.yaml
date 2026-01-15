@@ -49,4 +49,4 @@ jobs:
           maxColorRange: 100
 
       - name: Assemble Android
-        run: ./gradlew :app:assembleDebug :app:assembleRelease --stacktrace
+        run: ./gradlew :androidApp:assembleDebug :androidApp:assembleRelease --stacktrace
