@@ -1,7 +1,7 @@
 [versions]
 
 # Included build
-agp = "8.13.2"
+agp = "9.0.0"
 
 # Plugins
 compose = "1.10.0"
@@ -32,6 +32,11 @@ android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", ver
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 auto-service-annotations = { module = "com.google.auto.service:auto-service-annotations", version.ref = "autoservice" }
 auto-service-ksp = { module = "dev.zacsweers.autoservice:auto-service-ksp", version.ref = "autoservice-ksp" }
+compose-runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+compose-foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
+compose-ui = { module = "org.jetbrains.compose.ui:ui", version.ref = "compose" }
+compose-ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose" }
+compose-components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 junit-jupiter-bom = { module = "org.junit:junit-bom", version.ref = "junit-jupiter" }
 junit-jupiter-core = { module = "org.junit.jupiter:junit-jupiter" }
 junit-jupiter-launcher = { module = "org.junit.platform:junit-platform-launcher" }
@@ -59,13 +64,12 @@ navigation = { group = "org.jetbrains.androidx.navigation", name = "navigation-c
 kotlin-inject-viewmodel-publish = { id = "com.teobaranga.kotlin.inject.viewmodel.publish", version = "unspecified" }
 
 android-application = { id = "com.android.application", version.ref = "agp" }
-android-library = { id = "com.android.library", version.ref = "agp" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version.ref = "dependency-analysis" }
 jvm = { id = "org.jetbrains.kotlin.jvm" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
 serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }

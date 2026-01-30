@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompilationTask
 
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.android.application)
+    alias(libs.plugins.android.kotlin.multiplatform.library)
     alias(libs.plugins.compose)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ksp)
@@ -15,12 +15,18 @@ plugins {
 group = "com.teobaranga"
 
 kotlin {
-
     applyDefaultHierarchyTemplate()
 
-    androidTarget {
+    androidLibrary {
+        namespace = "com.teobaranga.kotlin.inject.viewmodel.app"
+        compileSdk = 36
+        minSdk = 24
+
+        withHostTest {
+        }
+
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget = JvmTarget.JVM_21
         }
     }
 
@@ -38,21 +44,17 @@ kotlin {
     jvm(name = "desktop")
 
     sourceSets {
-        androidMain.dependencies {
-            implementation(compose.preview)
-            implementation(libs.androidx.activity.compose)
-        }
-        androidUnitTest.dependencies {
+        getByName("androidHostTest").dependencies {
             implementation(project.dependencies.platform(libs.junit.jupiter.bom))
             implementation(libs.junit.jupiter.core)
             runtimeOnly(libs.junit.jupiter.launcher)
         }
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.ui)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.ui)
+            implementation(libs.compose.components.resources)
+            implementation(libs.compose.ui.tooling.preview)
             implementation(libs.lifecycle.viewmodel)
             implementation(libs.lifecycle.viewmodel.compose)
             implementation(libs.lifecycle.viewmodel.savedstate)
@@ -71,45 +73,14 @@ kotlin {
     configureCommonMainKsp()
 }
 
-android {
-    namespace = "com.teobaranga.kotlin.inject.viewmodel"
-    compileSdk = 36
-
-    defaultConfig {
-        applicationId = "com.teobaranga.kotlin.inject.viewmodel"
-        minSdk = 24
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-
-    testOptions {
-        unitTests.all { test ->
-            test.useJUnitPlatform()
-        }
-    }
-}
-
 dependencies {
     kspCommonMainMetadata(libs.kotlin.inject.compiler)
     kspCommonMainMetadata(libs.kotlin.inject.anvil.compiler)
     kspCommonMainMetadata(project(":compiler"))
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 fun KotlinMultiplatformExtension.configureCommonMainKsp() {

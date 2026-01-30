@@ -29,7 +29,7 @@ jobs:
           build-scan-terms-of-use-agree: "yes"
 
       - name: Run local tests
-        run: ./gradlew testDebug
+        run: ./gradlew test testAndroidHostTest
 
       - name: Generate coverage output
         if: github.ref == 'refs/heads/main'
@@ -49,4 +49,4 @@ jobs:
           maxColorRange: 100
 
       - name: Assemble Android
-        run: ./gradlew :app:assembleDebug :app:assembleRelease --stacktrace
+        run: ./gradlew :androidApp:assembleDebug :androidApp:assembleRelease --stacktrace
