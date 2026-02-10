@@ -21,7 +21,7 @@ dependencyResolutionManagement {
 }
 
 plugins {
-    id("org.jetbrains.kotlinx.kover.aggregation") version "0.9.6"
+    id("org.jetbrains.kotlinx.kover.aggregation") version "0.9.7"
 }
 
 kover {
