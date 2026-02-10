@@ -4,7 +4,7 @@
 agp = "9.0.0"
 
 # Plugins
-compose = "1.10.0"
+compose = "1.10.1"
 dependency-analysis = "3.5.1"
 kotlin = "2.3.10"
 ksp = "2.3.5"
