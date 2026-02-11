@@ -22,7 +22,7 @@ kotlin-poet = "2.2.0"
 lifecycle = "2.10.0"
 lifecycle-viewmodel-compose = "2.9.6"
 material3 = "1.9.0"
-navigation = "2.9.1"
+navigation = "2.9.2"
 junit-jupiter = "6.0.2"
 
 [libraries]
