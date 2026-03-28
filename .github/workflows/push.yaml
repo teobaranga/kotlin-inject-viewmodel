@@ -36,7 +36,7 @@ jobs:
         run: |
           echo "COVERAGE=$(./gradlew -q test koverLineCoverage -Pkover koverXmlReport)" >> $GITHUB_ENV
       - name: Update dynamic badge gist
-        uses: schneegans/dynamic-badges-action@v1.7.0
+        uses: schneegans/dynamic-badges-action@v1.8.0
         if: github.ref == 'refs/heads/main'
         with:
           auth: ${{secrets.GIST_SECRET}}
