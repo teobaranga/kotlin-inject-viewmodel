@@ -1,7 +1,7 @@
 [versions]
 
 # Included build
-agp = "9.1.0"
+agp = "9.1.1"
 
 # Plugins
 compose = "1.10.3"
