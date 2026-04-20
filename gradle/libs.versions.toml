@@ -5,7 +5,7 @@ agp = "9.1.1"
 
 # Plugins
 compose = "1.10.3"
-dependency-analysis = "3.8.0"
+dependency-analysis = "3.9.0"
 kotlin = "2.3.20"
 ksp = "2.3.6"
 maven-publish = "0.36.0"
